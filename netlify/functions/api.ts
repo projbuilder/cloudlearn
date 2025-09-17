@@ -38,33 +38,29 @@ app.use((req, res, next) => {
   next();
 });
 
-// Initialize the handler
-let handler: any;
+// 👇 renamed from "handler" to avoid conflict
+let cachedHandler: any;
 
 async function initHandler() {
-  if (!handler) {
-    // Register routes (this returns a Server but we just need the app configured)
+  if (!cachedHandler) {
     await registerRoutes(app);
 
-    // Error handling middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
       res.status(status).json({ message });
     });
 
-    // Health check endpoint
     app.get('/api/health', (req, res) => {
       res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
-    // Create the serverless handler
-    handler = serverless(app);
+    cachedHandler = serverless(app);
   }
-  return handler;
+  return cachedHandler;
 }
 
-// Export the handler function
+// ✅ no conflict now
 export const handler = async (event: any, context: any) => {
   const h = await initHandler();
   return h(event, context);
