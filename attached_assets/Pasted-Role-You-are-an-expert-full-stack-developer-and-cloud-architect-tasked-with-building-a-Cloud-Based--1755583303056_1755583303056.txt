@@ -1,0 +1,138 @@
+Role
+
+You are an expert full-stack developer and cloud architect tasked with building a Cloud-Based AI-Powered E-Learning Platform with Federated Learning (PPFL).
+
+Objective
+
+Create a working simulation of an interactive learning management system (LMS) where:
+
+Students can study, take quizzes, and get personalized recommendations.
+
+Instructors can upload materials and monitor student progress.
+
+AI tutors guide students using a free pre-trained AI model (Hugging Face, OpenAI, or LLaMA-2 API with free tier).
+
+Federated Learning ensures student privacy by training models locally (simulated on browser/device).
+
+Cloud manager aggregates weights, not raw data, to preserve privacy.
+
+Context
+
+This project is for college research/demo purposes with minimal to zero budget, so it must use free APIs, local ML libraries, and mock cloud infrastructure (simulated with Node.js backend + MongoDB/Firebase + Docker if needed).
+
+The system should reflect real cloud computing concepts (scalability, edge devices, federated aggregation, multi-tenancy).
+
+Functionalities to Implement
+1. User Roles & Access
+
+Students
+
+Register/Login (institution-specific).
+
+Access courses, study material, and lecture videos.
+
+Attempt quizzes & get real-time results.
+
+Receive AI tutor feedback (powered by free pretrained model).
+
+Get personalized recommendations and a dynamic learning path based on quiz scores, time spent, and engagement.
+
+Data stays local (simulated via browser/local DB).
+
+Instructors
+
+Create/manage courses and upload content (PDFs, videos, links).
+
+Create quizzes with MCQs and short-answer questions.
+
+View student analytics dashboards (charts, graphs of scores, engagement trends).
+
+Recommend additional resources manually.
+
+Cloud Manager (Admin/Server)
+
+Collects only federated model updates (weights, gradients).
+
+Monitors model performance & fairness across institutions.
+
+Manages multi-institution setup (Institution A’s data is isolated from Institution B).
+
+2. Federated Learning Workflow
+
+Each student’s AI tutor model is trained locally using their quiz/interaction data.
+
+The cloud manager aggregates model weights (e.g., FedAvg algorithm).
+
+Updated global model redistributed back to students/instructors.
+
+Privacy Guarantee: No raw student answers, personal data, or learning history leaves the device.
+
+3. AI Tutor & Recommendation System
+
+Use a free pretrained NLP model from Hugging Face (like distilbert-base-uncased or GPT-Neo) for Q&A assistance.
+
+AI recommends:
+
+Next best topic to study.
+
+Practice quizzes if student performance is low.
+
+Curated resources (open-source textbooks, Wikipedia, Khan Academy APIs, etc.).
+
+4. Institution Isolation (Multi-Tenancy)
+
+Students and instructors belong to institutions.
+
+Cloud manager ensures data and models are institution-specific.
+
+But aggregated federated models can be shared across institutions for general improvement.
+
+5. Analytics & Visualization
+
+Instructor Dashboard:
+
+Student progress graph (line chart of scores).
+
+Engagement metrics (time spent, attempts).
+
+Institution-wide performance heatmaps.
+
+Cloud Dashboard:
+
+Aggregated federated training performance.
+
+Model accuracy improvements over rounds.
+
+6. Tech Stack (Free & Feasible)
+
+Frontend: React + Tailwind (UI), Chart.js/Recharts (analytics).
+
+Backend: Node.js/Express OR Firebase (for quick demo).
+
+Database: MongoDB Atlas Free Tier OR Firebase Firestore.
+
+AI Models: Hugging Face Transformers (distilbert, gpt-neo free).
+
+Federated Learning Simulation: PySyft or TensorFlow Federated (lightweight demo).
+
+Cloud Simulation: Local Docker containers OR Firebase Functions to represent edge devices.
+
+Extra Requirements
+
+The app must start and run fully in Replit or local laptop (RTX 3050 + 32GB RAM capable).
+
+Provide sample open-source educational materials (Wikipedia extracts, free Khan Academy API, MIT OCW PDFs).
+
+All components (buttons, dashboards, quizzes, AI chat interface, file uploads, cloud aggregation console) must be fully implemented and working.
+
+Deliverables
+
+Fully functional web app (frontend + backend).
+
+AI tutor integrated with free Hugging Face model.
+
+Working federated learning demo with at least 2 simulated institutions.
+
+Instructor & Cloud dashboards with visual analytics.
+
+Demo dataset of learning materials + quizzes.

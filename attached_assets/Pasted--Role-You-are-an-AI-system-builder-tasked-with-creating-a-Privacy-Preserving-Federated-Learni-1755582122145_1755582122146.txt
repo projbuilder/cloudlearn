@@ -1,0 +1,45 @@
+# **Role:**
+You are an AI system builder tasked with creating a Privacy-Preserving Federated Learning (PPFL) based eLearning platform that includes a free, open-source AI Tutor.  
+
+# **Objective:**
+- Develop a working AI tutor system for eLearning that respects student privacy using PPFL.
+- The AI tutor must be powered by a **free and open-source pretrained model** (such as **LLaMA-2, Falcon, Mistral, Flan-T5, or Vicuna**).
+- Ensure the system adapts to student performance dynamically, while training happens locally using federated learning.
+
+# **Context:**
+- Many AI tutors today are commercial (e.g., GPT-4), but this project must rely on **free, open-source AI models**.
+- Privacy is critical: student learning data (responses, errors, progress) should never be centralized.
+- Instead, we use **federated learning** to aggregate improvements across distributed nodes (schools/universities) without exposing raw student data.
+- The AI tutor should act as an adaptive teaching assistant that explains concepts, provides hints, and generates quizzes.
+- Federated setup must use PPFL to ensure **encryption, secure aggregation, and local training**.
+
+# **Instructions:**
+## **Instruction 1: Tutor Model**
+- Select a **free open-source LLM** (e.g., **Flan-T5** for smaller scale or **LLaMA-2 / Mistral** for advanced tutoring).
+- Fine-tune the model on **educational Q&A datasets** (such as ASSISTments, Eedi, or public math/science tutoring datasets).
+- Make the tutor conversational and capable of:
+  - Explaining concepts in simple language.
+  - Asking guiding (Socratic) questions.
+  - Generating adaptive quizzes.
+  - Tracking student progress.
+
+## **Instruction 2: Federated Learning**
+- Use **Flower (FLwr)** or **TensorFlow Federated (TFF)** for building the federated learning pipeline.
+- Each institution runs the AI tutor locally, training on its own student interaction logs.
+- PPFL methods:
+  - **Secure aggregation** (homomorphic encryption or differential privacy).
+  - Local updates only; no raw student data leaves the node.
+  - Model updates are aggregated into a **global tutor model**.
+
+## **Instruction 3: Deployment**
+- Backend: **Python (PyTorch/TensorFlow + Flower)** for federated learning.
+- Frontend: **React (TypeScript)** for the student dashboard.
+- Database: **Firebase** or **MongoDB** for storing metadata (but not raw student answers).
+- Tutor interaction: Text-based (chat interface) + optional speech integration using **Whisper** (for free speech-to-text).
+
+# **Notes:**
+- Ensure the tutor works **offline first** at each institution and syncs only model updates, not raw data.
+- The system should be modular so that different open-source models (Flan-T5, Mistral, LLaMA-2) can be swapped in/out depending on compute availability.
+- Start with **Flan-T5-base** (small, free, Hugging Face hosted) for a working demo.
+- Consider adding **BERT4KT** or **SAKT** in the pipeline for knowledge tracing (predicting what a student is likely to know next).
+

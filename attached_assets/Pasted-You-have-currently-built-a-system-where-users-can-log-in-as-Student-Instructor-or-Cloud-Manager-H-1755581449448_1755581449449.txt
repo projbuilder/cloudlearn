@@ -1,0 +1,32 @@
+You have currently built a system where users can log in as Student, Instructor, or Cloud Manager. However, the major issue is that many of the features beyond the dashboards are broken and return **Error 401 Unauthorized**. Even the **Sign Out** button is not working and gives the same error.
+
+I need you to fix the following issues across **all three account types (Student, Instructor, Cloud Manager):**
+
+1. **Authentication & Session Handling**
+   - Ensure that all logged-in users have valid sessions and tokens to access their respective pages. 
+   - Fix the broken **sign-out/logout** function so it properly destroys the session/token and redirects the user to the login page.
+
+2. **Role-Based Access Control (RBAC)**
+   - Students should only access Student-specific pages and functions.
+   - Instructors should only access Instructor-specific modules (course creation, monitoring, grading, etc.).
+   - Cloud Managers should only access cloud management and federated learning-related controls.
+   - Any unauthorized access should be gracefully handled with a redirect to a proper error/permission page (not raw Error 401).
+
+3. **Page Accessibility**
+   - Make sure all navigation links from the dashboard (Learning Modules, Adaptive Quizzes, AI Tutor, Recommendations for Students; Course Management, Student Reports for Instructors; Cloud Config, Privacy Settings for Cloud Managers) load their respective pages without error.
+   - If a page is not yet implemented, show a placeholder component stating: “Feature under development” instead of a broken 401 page.
+
+4. **Error Handling**
+   - Replace the default 401 error with a **friendly message** or redirection.
+   - Example: If a student tries to access instructor tools, show a styled page: “Access denied – You don’t have permission to view this page.”
+
+5. **Code Improvements**
+   - Centralize authentication checks (middleware or guard functions) instead of scattering them across components.
+   - Implement proper route protection for each role type.
+   - Ensure **Cloud Sync** and **Federated Learning status** are not broken for Cloud Managers.
+
+🎯 Goal: Make sure that all three roles (Student, Instructor, Cloud Manager) can:
+   - Sign in successfully
+   - Navigate across their allowed dashboards and linked pages without error
+   - Sign out properly
+   - See user-friendly messages if they try to access unauthorized pages

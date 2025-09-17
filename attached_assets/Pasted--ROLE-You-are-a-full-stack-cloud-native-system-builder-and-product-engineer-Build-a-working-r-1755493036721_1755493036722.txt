@@ -1,0 +1,257 @@
+# ROLE
+You are a full-stack, cloud-native system builder and product engineer. Build a **working, realistic simulation** of a **Cloud-Based, AI-Powered E-Learning Platform** that includes **Federated Learning (FL) simulation**, **adaptive personalization**, and **cloud computing concepts** (storage, orchestration, observability, fault tolerance) — all runnable **entirely locally** (zero cost) on a single machine with an NVIDIA GPU (RTX 3050) or CPU fallback.
+
+# MISSION (Context-Aware & Dynamic)
+1) Deliver a complete app (frontend + backend + services + data + scripts) that **runs via one command** (`docker compose up`) and demonstrates:
+   - Core e-learning UX (materials, modules, quizzes, progress).
+   - AI-driven personalization (adaptive difficulty & next-best-module).
+   - **Federated Learning** simulation: multiple “learner nodes” train locally on their own logs and send only model deltas to a central aggregator (FedAvg), with optional Differential Privacy.
+   - Explicit **cloud concepts**: object storage, identity & access, message queues, serverless-like jobs, autoscaling simulation, multi-region latency simulation, monitoring dashboards.
+
+2) Be **contextual & dynamic**:
+   - Detect GPU availability; if CUDA is unavailable, use CPU paths.
+   - If the machine is offline, use **bundled materials**; if online, optionally fetch supplemental public-domain content.
+   - Seed repeatable demo data; still allow live interaction to change outcomes.
+   - Expose configuration in `.env` with safe defaults; respect changes without code edits.
+
+# NON-GOALS (to stay within zero budget & time)
+- No real cloud accounts, no paid APIs, no closed-source model dependencies.
+- No webcam or microphone capture by default (privacy). Provide a toggle for synthetic “engagement signals”.
+
+# USER ROLES
+- **Student**: Consume content, take quizzes, view progress, get recommendations.
+- **Instructor (simulated)**: Upload/curate materials, auto-generate/edit quizzes, view item analytics.
+- **Admin (simulated “cloud ops”)**: Manage users, trigger FL aggregation rounds, inspect service health/metrics, simulate region failover and autoscaling.
+
+# DATA SOURCES (copyright-safe & reproducible)
+Use the following **for this simulation**:
+- **OpenStax** (public domain/CC BY): preload excerpts for 2 subjects:
+  1) *Algebra & Trigonometry* → Modules: Linear Equations, Quadratic Functions, Trigonometric Basics.
+  2) *Computer Science* → Modules: Python Basics, Control Flow, Data Structures.
+- **Wikipedia**: optional short abstracts (1–3 paragraphs) fetched at runtime **only if online**; otherwise use bundled JSON snapshots.
+- **Project Gutenberg**: short public-domain excerpts for reading comprehension (optional).
+- All third-party content must be saved into **MinIO** (S3-compatible) at first boot and referenced from there.
+- Include a `content/seed/` folder with JSON lesson/quiz seeds so the app works fully offline.
+
+# CLOUD CONCEPTS TO REFLECT (explicitly visible in UI + code)
+- **Object Storage**: MinIO (S3 API) for materials, transcripts, model files.
+- **Identity & Access**: Keycloak (OIDC). Roles: student, instructor, admin.
+- **Message/Events**: Redis Streams (or NATS) for clickstream, quiz events, training jobs.
+- **“Serverless” Jobs**: A Jobs service that runs function handlers (Python) on a schedule or event, displayed as “Serverless Invocations” in the Admin UI (simulate cold start & concurrency).
+- **Multi-Region Simulation**: Label services with pseudo-regions (e.g., `region-a`, `region-b`), add configurable latency and a “Failover” toggle in Admin UI that reroutes requests.
+- **Autoscaling Simulation**: A slider in Admin → “Simulate load” that creates N ephemeral worker containers (or processes) and shows scaling events in logs & UI.
+- **Observability**: Prometheus + Grafana (or lightweight in-app dashboards) with panels: request rate, error rate, queue length, FL round duration, model accuracy per round.
+
+# TECH STACK (open-source only)
+- **Frontend**: React + Vite + TailwindCSS. State: Redux Toolkit or Zustand. Charts: Recharts.
+- **Gateway/Reverse Proxy**: Traefik.
+- **Auth**: Keycloak (OIDC) with preseeded users (student/instructor/admin).
+- **APIs (FastAPI, Python)**:
+  - `content-svc`: modules, lessons, asset manifests (S3), transcript search.
+  - `quiz-svc`: quiz CRUD, delivery, grading, item analysis, distractor generation.
+  - `events-svc`: writes click/attempt events to Redis Streams; exposes aggregates.
+  - `learner-model-svc`: personalization policy (bandit) + mastery estimates.
+  - `risk-svc`: dropout/struggle prediction batch job (CatBoost/XGBoost).
+  - `fl-agg-svc`: FL coordinator (Flower or custom FedAvg) + DP (Opacus).
+  - `jobs-svc`: “serverless” runner; executes YAML-declared handlers on schedules or events.
+  - `ops-svc`: health, region simulation, autoscaling simulation endpoints.
+- **Data**: PostgreSQL (primary), Redis (cache/streams), MinIO (S3).
+- **ML**: PyTorch, scikit-learn, sentence-transformers (small, CPU-ok). Opacus for DP.
+- **Containerization**: Docker + docker-compose. Optional: k3d manifest (bonus).
+
+# REPO STRUCTURE (generate)
+/app
+/frontend
+/services
+/content-svc
+/quiz-svc
+/events-svc
+/learner-model-svc
+/risk-svc
+/fl-agg-svc
+/jobs-svc
+/ops-svc
+/infra
+docker-compose.yml
+traefik/
+keycloak/
+grafana/
+prometheus/
+minio/
+postgres/
+redis/
+/content
+/seed/*.json
+/scripts
+seed_content.py
+run_experiment.py
+simulate_clients.py
+.env.example
+README.md
+
+markdown
+Copy
+Edit
+
+# DATABASE SCHEMAS (at minimum)
+- **users**(id, email, role, created_at)
+- **courses**(id, title, subject, region, created_at)
+- **modules**(id, course_id, title, order, summary, asset_uri)
+- **lessons**(id, module_id, title, body_markdown_uri, video_uri?)
+- **quizzes**(id, module_id, difficulty, generated_from, version)
+- **questions**(id, quiz_id, stem, options[], correct_index, tags[])
+- **attempts**(id, quiz_id, user_id, score, started_at, completed_at, item_stats_json)
+- **events**(id, user_id, type, payload_json, ts)  // also mirrored to Redis Streams
+- **recommendations**(id, user_id, module_id, reason, model_version, ts)
+- **fl_rounds**(id, round_num, client_count, dp_epsilon, global_metrics_json, ts)
+
+# FRONTEND — PAGES, BUTTONS & INTERACTIONS (enumerated)
+1. **Auth / Login**
+   - Buttons: “Login as Student / Instructor / Admin” (preseeded credentials shown).
+   - On success → redirect by role.
+
+2. **Student Dashboard**
+   - Components:
+     - **Progress Ring** per course.
+     - **Next Best Module** card with a “Why this?” tooltip (explainability from model).
+     - **Quick Actions**: [Continue Learning] [Take Quiz] [Review Mistakes] [View Recommendations].
+   - Buttons:
+     - **Continue Learning** → opens last lesson.
+     - **Take Quiz** → opens adaptive quiz (difficulty based on mastery).
+     - **Simulate Engagement** toggle → Low/Medium/High (synthesized feature for model).
+     - **Sync to Cloud** → posts local logs to events-svc (shows toast + Admin metrics).
+   - Edge Cases:
+     - If offline content only → show “Operating in offline mode” banner.
+
+3. **Learning Material Page**
+   - Displays markdown from MinIO with images.
+   - Buttons:
+     - **Start Quiz** (locks until lesson scrolled 80%).
+     - **Bookmark** (saves to user profile).
+     - **Report Issue** (opens feedback modal).
+
+4. **Quiz Page (Adaptive)**
+   - 5–10 MCQs per session.
+   - **Timer** visible; **Pause** disabled to prevent gaming (configurable).
+   - Buttons:
+     - **Submit** → grade; write attempt + per-item stats.
+     - **Explain Answers** → show rationale for each item (from curated metadata; if not available, rule-based explanation).
+     - **Retry Similar** → spawns a quiz with same tags at lower/higher difficulty based on score threshold.
+   - Edge Cases:
+     - If model is not warmed → default to medium difficulty and enqueue training.
+
+5. **Recommendations Page**
+   - Shows ranked modules with reasons (e.g., “low mastery on Quadratics”).
+   - Buttons: **Start Module**, **Add to Plan**, **Why?** (opens SHAP-like factors).
+
+6. **Instructor Console**
+   - Tabs:
+     - **Materials**: upload markdown/pdf to MinIO (drag-drop).
+       - Buttons: **Upload**, **Preview**, **Publish**.
+     - **Quiz Builder**: generate questions from lesson text.
+       - Buttons: **Generate Draft (local model)**, **Edit**, **Publish**.
+     - **Item Analysis**: difficulty, discrimination, distractor stats.
+       - Buttons: **Export CSV**, **Auto-Fix Distractors** (regenerate closest wrong options).
+   - Edge Cases: If offline, generation uses on-device embeddings; no network calls.
+
+7. **Admin (Cloud Ops)**
+   - **Federated Learning** tab:
+     - Display: current global model version, last 5 rounds table.
+     - Controls:
+       - **Trigger FL Round** (dropdown: number of clients N=4/8/16; DP ε; client fraction).
+       - **Simulate Dropouts** (slider), **Simulate Slow Clients** (latency).
+       - **Start Round** → Live log viewer: “N clients → deltas received → FedAvg → global metrics.”
+   - **Jobs (Serverless)**
+     - List of functions: `nightly_retrain`, `weekly_risk_score`, `content_ingest`.
+     - Controls: **Invoke Now**, **Schedule**, **Concurrency** (1–10), **Cold Start** toggle adds delay.
+   - **Regions & Scaling**
+     - Map with `region-a` & `region-b` status.
+     - Controls: **Inject Latency**, **Failover region-a → region-b**, **Scale Workers (0–10)**.
+   - **Observability**
+     - Charts: requests/sec, errors, queue depth, FL duration, model accuracy.
+     - Button: **Download Report (CSV)**.
+
+# AI & PERSONALIZATION DETAILS
+- **Knowledge Components (KCs)**: Each question tagged (e.g., `algebra.linear_equations`, `cs.control_flow`).
+- **Mastery Model**: Bayesian Knowledge Tracing (BKT) or a simple logistic mastery model per KC. Store mastery ∈ [0,1].
+- **Policy**: Contextual bandit (ε-greedy) chooses next difficulty/module to maximize mastery gain.
+- **Dropout/Struggle Risk**: Weekly batch in `risk-svc` using CatBoost/XGBoost over features: recent scores, time-on-task, retries, (optional) synthetic engagement level.
+- **Explainability**: Return top contributing features for recommendations (weights or SHAP-approx).
+
+# QUIZ GENERATION (offline-friendly)
+- **From Lessons**: use sentence-transformers embeddings to select key sentences → turn into cloze/MCQ with rule-based distractors (nearest neighbors with semantic distance > threshold).
+- **Metadata**: Each item stores rationale and KC tags.
+- **Difficulty**: Estimated by a small logistic regression fit on aggregate wrong-rate; adapt over time.
+
+# FEDERATED LEARNING (SIM)
+- **Clients**: Simulate 4–16 learner clients as containers/processes. Each client:
+  - Trains a small predictor on its own `attempts` for KC mastery improvement or next-question correctness.
+  - Sends only weight deltas to aggregator.
+- **Aggregator**: `fl-agg-svc` runs FedAvg; track per-round metrics. Optionally apply DP (Opacus) with configurable ε.
+- **UI Feedback**: Admin FL tab must show per-round:
+  - participating clients, bytes transferred, ε used, client dropouts, global AUC/accuracy.
+
+# “SERVERLESS” JOBS
+- YAML registry (`/services/jobs-svc/registry.yml`) defines functions:
+  - `nightly_retrain`: retrain personalization model on aggregated data.
+  - `weekly_risk_score`: recompute risk for all students; push notifications.
+  - `content_ingest`: pull new OpenStax excerpts; store to MinIO; index.
+- Jobs run on schedule (cron) or on-click. Show cold start delay & concurrency in UI.
+
+# ACCESSIBILITY & I18N
+- WCAG-friendly colors, keyboard navigation, ARIA labels.
+- i18n scaffolding (en baseline); strings externalized.
+
+# SECURITY & PRIVACY (simulation)
+- Keycloak OIDC with role-based routes.
+- No PII beyond email/role in seed; student names can be synthetic.
+- All “engagement” is synthetic toggles; no webcam/mic.
+- DP settings documented; raw attempts never leave client container in FL.
+
+# SCRIPTS & COMMANDS
+- `docker compose up` → brings up everything (frontend, services, MinIO, Redis, Postgres, Keycloak, Traefik, Grafana).
+- `python scripts/seed_content.py` → loads OpenStax/Wikipedia snapshots into MinIO and seeds DB.
+- `python scripts/simulate_clients.py --n 8 --duration 5m` → generates realistic click/quiz events.
+- `python scripts/run_experiment.py --fl --clients 8 --rounds 5 --dp_epsilon 3.0` → runs FL experiment & outputs CSV + charts.
+
+# .ENV DEFAULTS (provide .env.example)
+POSTGRES_URL=postgres://postgres:postgres@postgres:5432/elearn
+REDIS_URL=redis://redis:6379/0
+MINIO_ENDPOINT=minio:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+AUTH_ISSUER=http://keycloak:8080/realms/elearn
+REGION=region-a
+SIMULATED_LATENCY_MS=120
+GPU_REQUIRED=false
+
+markdown
+Copy
+Edit
+
+# TESTING & ACCEPTANCE CRITERIA
+- **Unit**: quiz generation utils, mastery update, bandit selection, FL aggregator math, DP noise application.
+- **Integration**: end-to-end: login → lesson → quiz → attempt saved → recommendation updated.
+- **Smoke**: `docker compose up` + `seed_content.py` completes without error; Student dashboard loads; Admin can run one FL round and see metrics update.
+- **Demo Flow (must work)**:
+  1) Login as Student → take Algebra quiz (score ~60%).
+  2) Dashboard shows **Next Best Module: Linear Equations (remediate)** with “Why this?”.
+  3) Admin → **Trigger FL Round (N=8, ε=∞)** → see logs + improved global model.
+  4) Student retakes quiz; recommendations adapt (harder/easier as appropriate).
+  5) Admin → **Invoke weekly_risk_score** job; Instructor sees a flag on struggling students.
+
+# DOCUMENTATION
+- **README** with:
+  - One-command run, credentials, URLs.
+  - Screenshots/GIFs of key flows.
+  - Architecture diagram (PNG) and services table.
+  - How FL works here, DP options, and limitations of the simulation.
+  - How to add new courses/modules/questions.
+
+# QUALITY BAR
+- Production-like foldering, clear logging, meaningful errors.
+- Tooltips for every non-obvious button.
+- All UI buttons described above must be present and functional.
+
+# DELIVERABLE
+Generate all code, config, seeds, and scripts; ensure it runs locally with zero external billing. If any library is too heavy, provide a light fallback. If online fetches fail, app must still fully function using seeded content.

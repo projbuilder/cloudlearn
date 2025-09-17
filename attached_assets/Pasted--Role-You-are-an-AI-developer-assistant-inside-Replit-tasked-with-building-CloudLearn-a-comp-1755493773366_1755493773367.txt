@@ -1,0 +1,70 @@
+# Role:
+You are an AI developer assistant inside Replit tasked with building **CloudLearn**, a comprehensive cloud-native e-learning platform simulation with **federated learning, AI personalization, gamification, multi-source content integration, and cloud-native observability**.
+
+# Objective:
+Create a fully functional **interactive simulation web app** where every button, tab, slider, and interaction reflects real-world cloud + federated learning concepts in e-learning.
+
+# Context:
+This is not a static demo. It must behave **contextually and dynamically**:
+- All dashboards, sliders, and quizzes update based on AI model outputs.
+- Cloud concepts (failover, GPU fallback, multi-region sync, observability) must be **visually demonstrated**.
+- The system should use **real content sources** (OpenStax, MIT OCW, Wikipedia APIs, Khan Academy, arXiv) for quizzes and AI tutor responses.
+
+# Functional Requirements:
+
+## 1. Roles & Authentication
+- Support Student, Instructor, and Admin roles.
+- Use Keycloak OIDC authentication simulation.
+
+## 2. Student Dashboard
+- Show learning progress with circular charts.
+- Show **Daily Streaks** (calendar + motivational nudges).
+- Show **Recent Activity Feed** (quizzes, modules, tutor Q&A).
+- Privacy slider (DP 1.0–5.0) → dynamically adjust personalization level.
+- Quick Actions:
+  - Continue Learning
+  - Take Adaptive Quiz
+  - Review Mistakes
+
+## 3. Adaptive Quizzes
+- Generate using AI (sentence transformers + distractors).
+- Pull questions from OpenStax, MIT OCW, Khan Academy, Wikipedia.
+- Provide **real-time feedback** and update mastery graph.
+- Show how quizzes **contribute to FL training**.
+
+## 4. Engagement Simulation
+- Dropdown (Low, Medium, High).
+- Button: Sync to Cloud → triggers edge→cloud data transfer.
+- Failure simulation: Cloud unavailable → fallback to local caching.
+
+## 5. Next Best Module
+- AI-driven recommendation using Bayesian Knowledge Tracing + contextual bandits.
+- Display difficulty, mastery gain %, estimated time.
+
+## 6. Gamification
+- Badges (streaks, performance, engagement).
+- Leaderboards across simulated peers.
+- Visual celebration effects for streaks.
+
+## 7. AI Tutor Assistant
+- Chat interface with RAG retrieval from OpenStax, MIT OCW, Wikipedia, Khan Academy, arXiv.
+- Tutor should explain mistakes, recommend next micro-modules.
+
+## 8. Cloud-Native Simulation
+- Federated Learning with 4–16 simulated edge nodes.
+- FedAvg aggregation + Differential Privacy noise visualization.
+- Prometheus + Grafana integration for live metrics.
+- MinIO, Redis Streams, serverless job orchestration.
+- Multi-region failover demo (AWS/GCP/Azure/local).
+- GPU/CPU fallback: if GPU unavailable, simulate CPU inference.
+
+## 9. Observability & Analytics
+- Dashboard for FL training progress.
+- Visualizations of loss curves, accuracy trade-offs, dropout prediction.
+- CatBoost/XGBoost analytics for dropout/struggle risk.
+
+# Output:
+- A working, **extremely realistic simulation** web app with interactive front-end + simulated back-end logic.
+- Every UI element should have **live state changes** tied to FL or cloud simulations.
+- Must adapt dynamically to user interactions (not static placeholders).
+
